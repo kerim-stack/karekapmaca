@@ -1,0 +1,827 @@
+:root {
+    --bg-color: #050b14;
+    --text-color: #e0f2f1;
+    --primary-neon: #00f3ff; /* Cyan */
+    --secondary-neon: #ff00ff; /* Magenta */
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --dot-color: #4db6ac;
+    --line-empty: rgba(255, 255, 255, 0.1);
+    --line-hover: rgba(255, 255, 255, 0.3);
+}
+
+body {
+    font-family: 'Exo 2', sans-serif;
+    background-color: var(--bg-color);
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 243, 255, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(255, 0, 255, 0.1) 0%, transparent 20%);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    min-height: 100dvh;
+    height: 100dvh;
+    margin: 0;
+    overflow: hidden; /* Prevent scrollbars */
+}
+
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Behind everything */
+    pointer-events: none;
+}
+
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    border-radius: 16px;
+}
+
+.container {
+    text-align: center;
+    z-index: 1; /* Above canvas */
+    width: min(1100px, 100%);
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto auto auto 1fr auto;
+    justify-items: center;
+    align-content: stretch;
+    gap: clamp(8px, 1.6vh, 16px);
+    padding: clamp(8px, 2vh, 16px);
+    box-sizing: border-box;
+}
+
+h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    color: var(--primary-neon);
+    text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+    letter-spacing: 2px;
+}
+
+/* Glitch Effect */
+.glitch {
+    position: relative;
+}
+
+.glitch::before,
+.glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.glitch::before {
+    left: 2px;
+    text-shadow: -1px 0 #ff00ff;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim 5s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+    left: -2px;
+    text-shadow: -1px 0 #00f3ff;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim2 5s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+    0% { clip: rect(14px, 9999px, 86px, 0); }
+    10% { clip: rect(63px, 9999px, 14px, 0); }
+    20% { clip: rect(98px, 9999px, 4px, 0); }
+    30% { clip: rect(34px, 9999px, 66px, 0); }
+    40% { clip: rect(2px, 9999px, 91px, 0); }
+    50% { clip: rect(83px, 9999px, 33px, 0); }
+    60% { clip: rect(44px, 9999px, 16px, 0); }
+    70% { clip: rect(26px, 9999px, 78px, 0); }
+    80% { clip: rect(9px, 9999px, 55px, 0); }
+    90% { clip: rect(66px, 9999px, 22px, 0); }
+    100% { clip: rect(52px, 9999px, 49px, 0); }
+}
+
+@keyframes glitch-anim2 {
+    0% { clip: rect(52px, 9999px, 49px, 0); }
+    10% { clip: rect(66px, 9999px, 22px, 0); }
+    20% { clip: rect(9px, 9999px, 55px, 0); }
+    30% { clip: rect(26px, 9999px, 78px, 0); }
+    40% { clip: rect(44px, 9999px, 16px, 0); }
+    50% { clip: rect(83px, 9999px, 33px, 0); }
+    60% { clip: rect(2px, 9999px, 91px, 0); }
+    70% { clip: rect(34px, 9999px, 66px, 0); }
+    80% { clip: rect(98px, 9999px, 4px, 0); }
+    90% { clip: rect(63px, 9999px, 14px, 0); }
+    100% { clip: rect(14px, 9999px, 86px, 0); }
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 0;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+label {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+select {
+    background-color: rgba(0, 0, 0, 0.3);
+    color: var(--text-color);
+    border: 1px solid var(--glass-border);
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    font-family: 'Exo 2', sans-serif;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+select:focus {
+    border-color: var(--primary-neon);
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+}
+
+select option {
+    background-color: var(--bg-color);
+}
+
+.glow-btn {
+    background: transparent;
+    color: var(--primary-neon);
+    border: 2px solid var(--primary-neon);
+    padding: 0.6rem 1.5rem;
+    font-family: 'Rajdhani', 'Exo 2', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.glow-btn:hover {
+    background: var(--primary-neon);
+    color: var(--bg-color);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
+}
+
+.scoreboard {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.player-score {
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.player-score.active {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: currentColor;
+    box-shadow: 0 0 15px currentColor;
+}
+
+.player1 { 
+    color: var(--primary-neon); 
+    text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
+}
+
+.player2 { 
+    color: var(--secondary-neon); 
+    text-shadow: 0 0 5px rgba(255, 0, 255, 0.5);
+}
+
+#turn-indicator {
+    margin-bottom: 0;
+    font-size: 1.2rem;
+    color: #b0bec5;
+    letter-spacing: 1px;
+}
+
+#current-player-name {
+    font-weight: bold;
+    color: #fff;
+}
+
+ .board-wrapper {
+     width: 100%;
+     height: 100%;
+     min-height: 0;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+ }
+
+/* Game Board */
+.game-board {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+    position: relative; /* Essential for absolute positioning of children */
+    
+    /* Responsive Scaling handled by JS for precision */
+    transform-origin: center center;
+    transition: transform 0.2s ease;
+}
+
+.dot {
+    background-color: var(--dot-color);
+    border-radius: 50%;
+    width: 8px;
+    height: 8px;
+    margin: auto;
+    box-shadow: 0 0 5px var(--dot-color);
+    position: relative;
+    z-index: 5;
+}
+
+.line-h, .line-v {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 4;
+}
+
+.line-h {
+    height: 20px; /* Touch area */
+    width: calc(100% + 20px);
+    margin-left: -10px;
+    align-self: center;
+    z-index: 4;
+}
+
+.line-v {
+    width: 20px; /* Touch area */
+    height: calc(100% + 20px);
+    margin-top: -10px;
+    justify-self: center;
+    z-index: 4;
+}
+
+/* Visual line inside touch area */
+.line-h::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--line-empty);
+    transform: translateY(-50%);
+    border-radius: 1px;
+    transition: all 0.3s ease;
+}
+
+.line-v::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--line-empty);
+    transform: translateX(-50%);
+    border-radius: 1px;
+    transition: all 0.3s ease;
+}
+
+.line-h:hover::after, .line-v:hover::after {
+    background-color: var(--line-hover);
+    box-shadow: 0 0 5px var(--line-hover);
+}
+
+.line-h.taken::after {
+    height: 4px; /* Thicker when taken */
+    z-index: 10;
+}
+
+.line-v.taken::after {
+    width: 4px;
+    z-index: 10;
+}
+
+.line-h.taken.p1::after {
+    background-color: var(--primary-neon) !important;
+    box-shadow: 0 0 10px var(--primary-neon), 0 0 20px var(--primary-neon);
+    opacity: 1 !important;
+    z-index: 20 !important;
+}
+
+.line-v.taken.p1::after {
+    background-color: var(--primary-neon) !important;
+    box-shadow: 0 0 10px var(--primary-neon), 0 0 20px var(--primary-neon);
+    opacity: 1 !important;
+    z-index: 20 !important;
+}
+
+.line-h.taken.p2::after {
+    background-color: var(--secondary-neon) !important;
+    box-shadow: 0 0 10px var(--secondary-neon), 0 0 20px var(--secondary-neon);
+    opacity: 1 !important;
+    z-index: 20 !important;
+}
+
+.line-v.taken.p2::after {
+    background-color: var(--secondary-neon) !important;
+    box-shadow: 0 0 10px var(--secondary-neon), 0 0 20px var(--secondary-neon);
+    opacity: 1 !important;
+    z-index: 20 !important;
+}
+
+/* Last computer move animation */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 10px #fff, 0 0 20px var(--secondary-neon);
+        filter: brightness(1.2);
+    }
+    50% {
+        box-shadow: 0 0 25px #fff, 0 0 50px var(--secondary-neon), 0 0 80px var(--secondary-neon);
+        filter: brightness(2);
+    }
+    100% {
+        box-shadow: 0 0 10px #fff, 0 0 20px var(--secondary-neon);
+        filter: brightness(1.2);
+    }
+}
+
+.last-computer-move::after {
+    animation: pulse 1s infinite ease-in-out !important;
+    z-index: 30 !important;
+    background-color: #fff !important; /* Make core white for intensity */
+}
+
+/* Sparkle Particle Effect */
+.sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #fff;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 100;
+    box-shadow: 0 0 10px #fff, 0 0 20px var(--secondary-neon);
+    animation: fly-away 0.8s ease-out forwards;
+}
+
+@keyframes fly-away {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--tx), var(--ty)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Modal Grid Overlay for blinking squares */
+#modal-grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.modal-blink-square {
+    position: absolute;
+    width: 63px; /* Slightly smaller than grid cell */
+    height: 63px;
+    background-color: var(--primary-neon); /* Default, JS changes */
+    opacity: 0;
+    transform: translate(-50%, -50%);
+    animation: blink-fade 4s ease-in-out forwards;
+}
+
+@keyframes blink-fade {
+    0% { opacity: 0; }
+    50% { opacity: 0.3; }
+    100% { opacity: 0; }
+}
+
+/* Modal specific styles */
+.modal-controls {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    width: 100%;
+    justify-items: stretch;
+}
+
+.modal-controls .control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.modal-controls label {
+    font-size: 0.95rem;
+}
+
+.modal-controls select {
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    margin-top: 0.35rem;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.95rem;
+}
+
+.box {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    transition: background-color 0.5s ease, box-shadow 0.5s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    border-radius: 4px;
+}
+
+.box.p1 {
+    background-color: rgba(0, 243, 255, 0.2);
+    box-shadow: inset 0 0 15px rgba(0, 243, 255, 0.3);
+    animation: box-pop 0.3s ease-out;
+}
+
+.box.p2 {
+    background-color: rgba(255, 0, 255, 0.2);
+    box-shadow: inset 0 0 15px rgba(255, 0, 255, 0.3);
+    animation: box-pop 0.3s ease-out;
+}
+
+@keyframes box-pop {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(4, 7, 14, 0.7);
+    background-image:
+        radial-gradient(circle at 18% 22%, rgba(0, 243, 255, 0.16) 0%, transparent 45%),
+        radial-gradient(circle at 82% 78%, rgba(255, 0, 255, 0.14) 0%, transparent 46%),
+        linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: auto, auto, 64px 64px, 64px 64px;
+    background-position: center, center, center, center;
+    backdrop-filter: blur(8px);
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
+    box-sizing: border-box;
+    overflow: auto;
+}
+
+.modal-content {
+    padding: clamp(1rem, 4vw, 2.2rem);
+    text-align: center;
+    max-width: 560px;
+    width: min(560px, 100%);
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.modal h2 {
+    color: var(--primary-neon);
+    font-family: 'Orbitron', sans-serif;
+    margin-bottom: 0.25rem;
+    font-size: clamp(1.1rem, 3.8vw, 1.6rem);
+    text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+}
+
+.intro-text {
+    line-height: 1.5;
+    margin-bottom: 0;
+    color: #cfd8dc;
+    text-align: left;
+    font-size: clamp(0.9rem, 3.2vw, 1rem);
+}
+
+.intro-text strong {
+    display: block;
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.intro-rules {
+    margin: 0;
+    padding-left: 1.15rem;
+}
+
+.intro-rules li {
+    margin: 0.15rem 0;
+}
+
+.player-inputs {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+    flex-wrap: wrap;
+}
+
+#start-game-btn {
+    margin-top: 0.75rem;
+    flex-shrink: 0;
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+    .modal-content {
+        padding: 0.9rem;
+        max-height: calc(100dvh - 24px);
+    }
+
+    .modal h2 {
+        margin-bottom: 0.25rem;
+        font-size: 1.15rem;
+    }
+
+    .intro-text {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+        line-height: 1.45;
+    }
+
+    .modal-controls {
+        grid-template-columns: 1fr 1fr;
+        margin-bottom: 0.5rem;
+    }
+
+    .player-inputs {
+        gap: 0.6rem;
+        margin-bottom: 0;
+    }
+
+    #start-game-btn {
+        margin-top: 0.5rem;
+    }
+}
+
+.player-inputs .input-group {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.player-inputs input {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--glass-border);
+    padding: 0.5rem;
+    border-radius: 4px;
+    color: white;
+    font-family: 'Exo 2', sans-serif;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.player-inputs input:focus {
+    border-color: var(--primary-neon);
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Responsive Design - Handled mostly by JS now */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .container {
+        gap: clamp(6px, 1.2vh, 12px);
+    }
+
+    .scoreboard {
+        margin-bottom: 10px;
+        padding: 0.5rem 1rem;
+    }
+    
+    .player-score {
+        padding: 0.5rem;
+        min-width: 80px;
+    }
+    
+    .player-score div:first-child {
+        font-size: 0.9rem;
+    }
+    
+    .player-score div:last-child {
+        font-size: 1.5rem;
+    }
+
+    .controls {
+        margin-top: 0 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Remove conflicting transforms */
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+    .container {
+        grid-template-columns: minmax(190px, 280px) 1fr;
+        grid-template-rows: auto auto auto 1fr auto;
+        justify-items: stretch;
+        padding: 10px;
+        gap: 10px;
+    }
+
+    h1 {
+        grid-column: 1;
+        justify-self: stretch;
+        text-align: left;
+        font-size: 1.4rem;
+        margin: 0;
+        line-height: 1.1;
+    }
+
+    .scoreboard {
+        grid-column: 1;
+        justify-content: flex-start;
+        gap: 10px;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .player-score {
+        padding: 0.5rem 0.6rem;
+    }
+
+    .player-score div:last-child {
+        font-size: 1.4rem;
+    }
+
+    #turn-indicator {
+        grid-column: 1;
+        text-align: left;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .controls {
+        grid-column: 1;
+        justify-content: flex-start;
+        margin: 0;
+        gap: 10px;
+    }
+
+    .glow-btn {
+        padding: 0.45rem 0.9rem;
+        font-size: 0.9rem;
+    }
+
+    .board-wrapper {
+        grid-column: 2;
+        grid-row: 1 / -1;
+        height: 100%;
+        align-self: stretch;
+        justify-self: stretch;
+    }
+}
+
+/* Portrait Optimization */
+@media (orientation: portrait) {
+    .container {
+        /* Reduce overall gaps and padding aggressively */
+        gap: 2px;
+        padding: 4px;
+        /* Ensure board gets max space */
+        grid-template-rows: min-content min-content min-content 1fr min-content;
+        height: 100dvh;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    h1 {
+        /* Make title very compact */
+        font-size: 1.6rem;
+        margin: 0;
+        padding-top: 4px;
+        line-height: 1.1;
+    }
+
+    .scoreboard {
+        /* Compact scoreboard */
+        margin: 0;
+        padding: 0;
+        gap: 4px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .player-score {
+        padding: 0.2rem 0.8rem;
+        min-width: 60px;
+        border-radius: 6px;
+    }
+
+    .player-score div:first-child {
+        font-size: 0.75rem;
+        margin-bottom: 2px;
+    }
+
+    .player-score div:last-child {
+        font-size: 1.2rem;
+        line-height: 1;
+    }
+
+    #turn-indicator {
+        font-size: 0.9rem;
+        margin: 0;
+        padding: 2px 0;
+    }
+
+    .board-wrapper {
+        /* Maximize board area */
+        flex-grow: 1;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+    }
+
+    #game-board {
+        /* Ensure board scales to fit */
+        margin: 0;
+        /* Remove padding handled by JS if needed, but CSS padding here might conflict */
+        /* Let JS handle padding via scaleBoard */
+    }
+
+    .controls {
+        /* Compact buttons */
+        margin: 0;
+        padding-bottom: 8px;
+        gap: 8px;
+    }
+
+    .glow-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        border-width: 1px;
+    }
+}
