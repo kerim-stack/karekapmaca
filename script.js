@@ -193,9 +193,10 @@ const p2InputGroup = document.getElementById('p2-input-group');
 const modalGameMode = document.getElementById('modal-game-mode');
 const modalDifficulty = document.getElementById('modal-difficulty');
 const modalDifficultyGroup = document.getElementById('modal-difficulty-group');
+const audioToggleEl = document.getElementById('audio-toggle');
 
 const audio = {
-    bgm: new Audio('1.mp3'),
+    bgm: new Audio('3.wav'),
     line: new Audio('1.wav'),
     box: new Audio('2.wav'),
     ui: new Audio('2.mp3')
@@ -215,6 +216,8 @@ function tryPlayAudio(a) {
 
 function ensureBgmPlaying() {
     if (!audio.bgm) return;
+    audio.bgm.muted = state.isMuted;
+    if (state.isMuted) return;
     if (!audio.bgm.loop) audio.bgm.loop = true;
     if (audio.bgm.volume !== 0.2) audio.bgm.volume = 0.2;
     if (audio.bgm.paused) tryPlayAudio(audio.bgm);
@@ -222,8 +225,10 @@ function ensureBgmPlaying() {
 
 function playSfx(src) {
     if (!src) return;
+    if (state.isMuted) return;
     const a = src.cloneNode(true);
     a.volume = src.volume;
+    a.muted = state.isMuted;
     tryPlayAudio(a);
 }
 
@@ -237,9 +242,46 @@ let state = {
     isGameOver: false,
     isComputerTurn: false,
     isInputLocked: false, // Prevent ghost clicks
+    isMuted: false,
     playerNames: { 1: 'Oyuncu 1', 2: 'Oyuncu 2' },
     modalGridInterval: null
 };
+
+function setAudioMuted(muted) {
+    state.isMuted = muted;
+    if (audio.bgm) audio.bgm.muted = muted;
+    if (audio.line) audio.line.muted = muted;
+    if (audio.box) audio.box.muted = muted;
+    if (audio.ui) audio.ui.muted = muted;
+    if (!muted) ensureBgmPlaying();
+}
+
+function createToggleRipple(isOn) {
+    if (!audioToggleEl) return;
+    const rect = audioToggleEl.getBoundingClientRect();
+    const r = document.createElement('div');
+    const togglePadding = 3;
+    const toggleHeight = 44;
+    const thumbSize = 32;
+    const size = 38;
+    const x = isOn ? (rect.width - togglePadding - thumbSize / 2) : (togglePadding + thumbSize / 2);
+    r.className = 'ripple';
+    r.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${x - size / 2}px; top:${(toggleHeight - size) / 2}px;
+      border: 2px solid ${isOn ? '#00f5ff' : '#ff00cc'};
+      box-shadow: 0 0 8px ${isOn ? '#00f5ff' : '#ff00cc'};
+    `;
+    audioToggleEl.appendChild(r);
+    setTimeout(() => r.remove(), 600);
+}
+
+function setToggleState(isOn, withRipple) {
+    if (!audioToggleEl) return;
+    audioToggleEl.classList.toggle('on', isOn);
+    audioToggleEl.classList.toggle('off', !isOn);
+    if (withRipple) createToggleRipple(isOn);
+}
 
 // Modal Grid Animation
 function startModalGridAnimation() {
@@ -313,6 +355,17 @@ function init() {
     boardEl.style.gridTemplateColumns = `repeat(${COLS}, ${DOT_SIZE}px ${BOX_SIZE}px) ${DOT_SIZE}px`;
     boardEl.style.gridTemplateRows = `repeat(${ROWS}, ${DOT_SIZE}px ${BOX_SIZE}px) ${DOT_SIZE}px`;
     boardEl.style.padding = `${PADDING}px`;
+
+    setToggleState(!state.isMuted, false);
+    if (audioToggleEl) {
+        audioToggleEl.addEventListener('click', (e) => {
+            e.preventDefault?.();
+            const isOn = audioToggleEl.classList.contains('on');
+            const nextOn = !isOn;
+            setToggleState(nextOn, true);
+            setAudioMuted(!nextOn);
+        });
+    }
 
     // Add event listeners
     window.addEventListener('resize', handleViewportResize);

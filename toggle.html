@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+
+  @property --angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #04040e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  /* ─── TOGGLE SHELL ─── */
+  .toggle {
+    width: 220px;
+    height: 90px;
+    border-radius: 45px;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* animated conic glow border */
+  .toggle::before {
+    content: '';
+    position: absolute;
+    inset: -2.5px;
+    border-radius: 47.5px;
+    background: conic-gradient(from var(--angle), #ff00cc, #00f5ff, #ff00cc88, #00f5ff, #ff00cc);
+    animation: spinAngle 4s linear infinite;
+    z-index: 0;
+  }
+
+  @keyframes spinAngle {
+    to { --angle: 360deg; }
+  }
+
+  /* outer glow */
+  .toggle::after {
+    content: '';
+    position: absolute;
+    inset: -2.5px;
+    border-radius: 47.5px;
+    background: conic-gradient(from var(--angle), #ff00cc, #00f5ff, #ff00cc88, #00f5ff, #ff00cc);
+    animation: spinAngle 4s linear infinite;
+    filter: blur(10px);
+    opacity: 0.55;
+    z-index: -1;
+  }
+
+  .track {
+    position: absolute;
+    inset: 2.5px;
+    border-radius: 43px;
+    background: #07071a;
+    overflow: hidden;
+    z-index: 1;
+    transition: background 0.5s;
+  }
+
+  /* subtle inner grid */
+  .track::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,245,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,255,0.04) 1px, transparent 1px);
+    background-size: 14px 14px;
+  }
+
+  /* scanlines */
+  .track::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent, transparent 3px,
+      rgba(0,0,0,0.18) 3px, rgba(0,0,0,0.18) 4px
+    );
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  /* ─── EQ BARS (OFF side — left) ─── */
+  .eq-off {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 46px;
+    z-index: 5;
+    transition: opacity 0.4s;
+  }
+
+  .eq-off .bar {
+    width: 3px;
+    border-radius: 2px;
+    background: #ff00cc;
+    box-shadow: 0 0 4px #ff00cc88;
+    opacity: 0.25;
+    transition: height 0.3s;
+  }
+
+  /* static dead bars */
+  .eq-off .bar:nth-child(1) { height: 8px; }
+  .eq-off .bar:nth-child(2) { height: 4px; }
+  .eq-off .bar:nth-child(3) { height: 12px; }
+  .eq-off .bar:nth-child(4) { height: 6px; }
+  .eq-off .bar:nth-child(5) { height: 10px; }
+
+  /* ─── SOUND WAVE ARCS (ON side — right) ─── */
+  .waves {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    z-index: 5;
+    transition: opacity 0.4s;
+  }
+
+  .waves svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .arc {
+    fill: none;
+    stroke: #00f5ff;
+    stroke-linecap: round;
+    transform-origin: 50% 50%;
+  }
+
+  .arc-1 { stroke-width: 2px; animation: arcPulse 1.2s ease-in-out infinite; }
+  .arc-2 { stroke-width: 2px; animation: arcPulse 1.2s ease-in-out infinite 0.2s; }
+  .arc-3 { stroke-width: 2px; animation: arcPulse 1.2s ease-in-out infinite 0.4s; }
+
+  @keyframes arcPulse {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; filter: drop-shadow(0 0 4px #00f5ff); }
+  }
+
+  /* speaker cone paths */
+  .speaker-body {
+    fill: #00f5ff;
+    filter: drop-shadow(0 0 3px #00f5ff88);
+  }
+
+  /* ─── THUMB ─── */
+  .thumb {
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    width: 71px;
+    height: 71px;
+    border-radius: 50%;
+    z-index: 8;
+    transition: transform 0.42s cubic-bezier(0.34, 1.45, 0.64, 1);
+    will-change: transform;
+  }
+
+  .toggle.on .thumb {
+    transform: translateX(130px);
+  }
+
+  /* thumb glow ring */
+  .thumb-ring {
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: conic-gradient(from var(--angle), #ff00cc, #00f5ff, #ff00cc);
+    animation: spinAngle 2s linear infinite;
+    z-index: 0;
+  }
+
+  .thumb-ring::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: conic-gradient(from var(--angle), #ff00cc, #00f5ff, #ff00cc);
+    animation: spinAngle 2s linear infinite;
+    filter: blur(8px);
+    opacity: 0.7;
+  }
+
+  .thumb-face {
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, #1c1035, #05050f);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* glare */
+  .thumb-face::before {
+    content: '';
+    position: absolute;
+    top: 12%;
+    left: 14%;
+    width: 36%;
+    height: 22%;
+    background: rgba(255,255,255,0.07);
+    border-radius: 50%;
+    transform: rotate(-30deg);
+  }
+
+  /* center visualizer inside thumb */
+  .thumb-viz {
+    display: flex;
+    align-items: center;
+    gap: 2.5px;
+    height: 28px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .viz-bar {
+    width: 3px;
+    border-radius: 2px;
+    background: linear-gradient(to top, #ff00cc, #ff88ee);
+    box-shadow: 0 0 5px #ff00cc;
+    transition: background 0.4s, box-shadow 0.4s;
+  }
+
+  .toggle.on .viz-bar {
+    background: linear-gradient(to top, #00f5ff, #88ffff);
+    box-shadow: 0 0 5px #00f5ff;
+  }
+
+  .viz-bar:nth-child(1) { height: 8px;  animation: vb 0.7s ease-in-out infinite; }
+  .viz-bar:nth-child(2) { height: 18px; animation: vb 0.5s ease-in-out infinite 0.1s; }
+  .viz-bar:nth-child(3) { height: 26px; animation: vb 0.9s ease-in-out infinite 0.05s; }
+  .viz-bar:nth-child(4) { height: 18px; animation: vb 0.6s ease-in-out infinite 0.15s; }
+  .viz-bar:nth-child(5) { height: 8px;  animation: vb 0.8s ease-in-out infinite 0.2s; }
+
+  @keyframes vb {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.2); }
+  }
+
+  /* muted: freeze bars low */
+  .toggle.off .viz-bar {
+    animation: none;
+    transform: scaleY(0.15);
+    opacity: 0.4;
+  }
+
+  /* ─── RIPPLE ─── */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 20;
+    animation: rippleAnim 0.55s ease-out forwards;
+  }
+
+  @keyframes rippleAnim {
+    from { transform: scale(0.8); opacity: 0.7; }
+    to   { transform: scale(2.6); opacity: 0; }
+  }
+
+  /* ─── STATE TRANSITIONS ─── */
+  /* ON: waves visible, eq hidden */
+  .toggle.on .waves  { opacity: 1; }
+  .toggle.on .eq-off { opacity: 0; pointer-events: none; }
+
+  /* OFF: eq visible, waves hidden */
+  .toggle.off .waves  { opacity: 0; pointer-events: none; }
+  .toggle.off .eq-off { opacity: 1; }
+
+  /* ON: arc animations running */
+  .toggle.off .arc { animation: none; opacity: 0.08; }
+
+</style>
+</head>
+<body>
+
+<div class="toggle off" id="toggle" onclick="handleToggle(event)">
+  <!-- animated border is via ::before/::after on .toggle -->
+
+  <div class="track"></div>
+
+  <!-- LEFT: muted EQ bars -->
+  <div class="eq-off">
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+  </div>
+
+  <!-- RIGHT: sound wave arcs -->
+  <div class="waves">
+    <svg viewBox="-4 -4 32 32" xmlns="http://www.w3.org/2000/svg">
+      <!-- speaker body -->
+      <polygon class="speaker-body" points="0,8 0,16 5,16 11,21 11,3 5,8"/>
+      <!-- arcs -->
+      <path class="arc arc-1" d="M14,9.5 Q17,12 14,14.5"/>
+      <path class="arc arc-2" d="M16.5,6.5 Q21,12 16.5,17.5"/>
+      <path class="arc arc-3" d="M19,3.5 Q25.5,12 19,20.5"/>
+    </svg>
+  </div>
+
+  <!-- THUMB -->
+  <div class="thumb" id="thumb">
+    <div class="thumb-ring"></div>
+    <div class="thumb-face">
+      <div class="thumb-viz">
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let isOn = false;
+
+  function handleToggle(e) {
+    isOn = !isOn;
+    const toggle = document.getElementById('toggle');
+    toggle.classList.toggle('on', isOn);
+    toggle.classList.toggle('off', !isOn);
+
+    // ripple
+    const rect = toggle.getBoundingClientRect();
+    const r = document.createElement('div');
+    const size = 71;
+    const x = isOn ? (rect.width - 7 - size/2) : (7 + size/2);
+    r.className = 'ripple';
+    r.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${x - size/2}px; top:${(85-size)/2}px;
+      border: 2px solid ${isOn ? '#00f5ff' : '#ff00cc'};
+      box-shadow: 0 0 8px ${isOn ? '#00f5ff' : '#ff00cc'};
+    `;
+    toggle.appendChild(r);
+    setTimeout(() => r.remove(), 600);
+  }
+</script>
+</body>
+</html>
